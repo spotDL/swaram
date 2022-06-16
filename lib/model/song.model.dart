@@ -1,49 +1,78 @@
-// Dart imports:
-import 'dart:convert';
-import 'dart:typed_data';
+/// a representation of a song stored in the database
+///
+class SongRepr {
+  /// path to the file on disk
+  ///
+  late final String filePath;
 
-// Flutter imports:
-import 'package:flutter/material.dart';
-
-class Song {
+  /// song's name
+  ///
   late final String name;
-  late final String album;
-  late final List<String> artists;
-  late final String genre;
-  late final int trackPos;
-  late final String lyrics;
-  late final Uint8List albumArt;
 
-  Song({
+  /// album name
+  ///
+  late final String album;
+
+  /// the contributing artists (for this song)
+  ///
+  late final List<String> artists;
+
+  /// genre of the song
+  ///
+  late final String genre;
+
+  /// position of the track within the album
+  ///
+  late final int trackPos;
+
+  /// lyrics of the song if available
+  ///
+  late final String lyrics;
+
+  /// number of the albumArtFile
+  ///
+  late final int albumArtFileNumber;
+
+  /// construct a song representation with the given details
+  ///
+  SongRepr({
+    required this.filePath,
     required this.name,
     required this.album,
     required this.artists,
-    this.genre = 'unknown',
     required this.trackPos,
-    required this.albumArt,
-    this.lyrics = '',
+    required this.albumArtFileNumber,
+    required this.genre,
+    required this.lyrics,
   });
 
-  Song.fromMap(Map map) {
+  /// construct a song representation from JSON returned form [toMap]
+  ///
+  SongRepr.fromMap(Map<String, dynamic> map) {
     name = map['name'];
-    // we need this oddball notation to deal with ImmutableList<dynamic> that is passed occasionally
-    artists = [for (var artist in map['artists']) artist as String];
     album = map['album'];
-    trackPos = map['trackPos'];
     genre = map['genre'];
     lyrics = map['lyrics'];
-    albumArt = base64.decode(map['albumArt']);
+    filePath = map['filePath'];
+    trackPos = map['trackPos'];
+    albumArtFileNumber = map['albumArtFileNumber'];
+
+    // we need this oddball notation to deal with ImmutableList<dynamic> that is passed occasionally
+    artists = [for (var artist in map['artists']) artist as String];
   }
 
+  /// convert song representation to a Map to be stored in the database
+  ///
   Map toMap() {
     return {
       'name': name,
       'album': album,
-      'artists': artists,
       'genre': genre,
-      'trackPos': trackPos,
-      'albumArt': base64.encode(albumArt),
       'lyrics': lyrics,
+      'artists': artists,
+      'filePath': filePath,
+      'trackPos': trackPos,
+      'albumArtFileNumber': albumArtFileNumber,
     };
   }
 }
