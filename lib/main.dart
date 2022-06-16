@@ -2,10 +2,10 @@
 import 'dart:io';
 
 // Project imports:
-import 'package:swaram/model/meta_data.model.dart';
+import 'package:swaram/model/music_database.model.dart';
 
 void main(List<String> args) async {
-  var md = MusicDataBase();
+  var md = MusicDatabase();
   await md.initialize();
 
   var musicDir = Directory("C:\\Users\\ShadyTi\\Music\\");

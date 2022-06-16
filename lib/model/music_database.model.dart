@@ -17,7 +17,7 @@ import 'package:swaram/util/path.util.dart';
 
 /// Store and access song details to quickly update UI
 ///
-class MusicDataBase extends ChangeNotifier {
+class MusicDatabase extends ChangeNotifier {
   /// sembast Database, access via `_store`
   ///
   late final Database _database;
