@@ -51,7 +51,7 @@ class MusicDatabase extends ChangeNotifier {
   /// ### Note:
   /// - returns `true` if song is added, `false` is song is skipped
   ///
-  Future<bool> addSong(String mp3FilePath) async {
+  Future<bool> addSong({required String mp3FilePath}) async {
     // read the ID3 tags
     var mp3Bytes = await File(mp3FilePath).readAsBytes();
     var mp3Data = MP3Instance(mp3Bytes)..parseTagsSync();
@@ -88,7 +88,7 @@ class MusicDatabase extends ChangeNotifier {
     while (!albumArtCached && id3Data.containsKey('APIC')) {
       albumArtFileNumber = _randomEngine.nextInt(1000000);
 
-      var albumArtFile = File(await getAlbumArtPath(albumArtFileNumber));
+      var albumArtFile = File(await getAlbumArtJpg(albumArtFileNumber));
 
       if (!albumArtFile.existsSync()) {
         await albumArtFile.writeAsBytes(
@@ -124,7 +124,7 @@ class MusicDatabase extends ChangeNotifier {
 
   /// delete a song's ID3 data and albumArtCache
   ///
-  Future<void> deleteSong(SongRepr uSong) async {
+  Future<void> deleteSong({required SongRepr uSong}) async {
     // search for songs
     var songResults = await findSongs(field: 'name', query: uSong.name);
 
@@ -135,9 +135,43 @@ class MusicDatabase extends ChangeNotifier {
 
       if (uSong.album == song.album && listEquals(uSong.artists, song.artists)) {
         await _store.record(songId).delete(_database);
-
-        await File(await getAlbumArtPath(song.albumArtFileNumber)).delete();
       }
+    }
+  }
+
+  /// remove remnants of deleted data (if any) from the database and albumArtCache
+  ///
+  /// ### Note:
+  /// - avoid using often, it is a costly operation
+  ///
+  Future<void> refreshDatabase() async {
+    // empty album art cache
+    var albumArtCacheFolder = Directory(
+      await getAlbumArtCachePath(),
+    ).listSync().forEach((element) {
+      if (element is File) element.deleteSync();
+    });
+
+    // get all songs
+    var allSongs = await findSongs(field: 'name', query: '');
+
+    // empty database, re-update cache and database
+    var filePaths = <String>[];
+
+    for (var songEntry in allSongs.entries) {
+      filePaths.add(songEntry.value.filePath);
+
+      await _store.record(songEntry.key).delete(_database);
+
+      var albumArtFile = await File(await getAlbumArtJpg(songEntry.value.albumArtFileNumber));
+
+      if (await albumArtFile.exists()) {
+        await albumArtFile.delete();
+      }
+    }
+
+    for (var path in filePaths) {
+      addSong(mp3FilePath: path);
     }
   }
 

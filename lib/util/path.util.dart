@@ -36,9 +36,18 @@ Future<String> getSwaramDatabasePath() async {
   );
 }
 
+/// get file part to the albumArtCache folder
+///
+Future<String> getAlbumArtCachePath() async {
+  return join(
+    await getSwaramDocsPath(),
+    'albumArtCache',
+  );
+}
+
 /// get file path to a specific album art cover
 ///
-Future<String> getAlbumArtPath(int albumArtId) async {
+Future<String> getAlbumArtJpg(int albumArtId) async {
   return join(
     await getSwaramDocsPath(),
     'albumArtCache',
