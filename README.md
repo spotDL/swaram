@@ -24,15 +24,25 @@ var mDatabase = MusicDatabase();
 await mDatabase.initialize();
 
 // add a song
-await mDatabase.addSong('./test/testSong.mp3');             // lets say that the song is Iron by Woodkid
+await mDatabase.addSong('./test/testSong.mp3');     // lets say that the song is Iron by Woodkid
 
 // search for a song (returns a list of `SongRepr`)
-var song = await mDatabase.findSongs('name', 'iro').first   // all songs starting with the letters 'iro'
-await mDatabase.findSongs('album', 'Iro')                   // all songs belonging to albums starting with 'iro'
-await mDatabase.findSongs('artists', 'woodkid')             // all songs by or featuring 'woodkid'
+
+// 1. all songs starting with the letters 'iro'
+var song = (await mDatabase.findSongs(,
+    field: 'name',
+    query: 'iro',
+    searchingByArtist: true,
+    )).first;
+
+// 2. all songs belonging to albums starting with 'iro'
+await mDatabase.findSongs(field:'album', query: 'Iro');      
+
+// 3. all songs by or featuring 'woodkid'
+await mDatabase.findSongs(field:'artists', query: 'woodkid');
 
 // delete a song
-await mDatabase.deleteSong(song)                            // deletes Iron by woodkid
+await mDatabase.deleteSong(song);                   // deletes Iron by woodkid
 ```
 
 ## The `SongRepr` Object
@@ -56,7 +66,7 @@ The quantum of information exchange is the `SongRepr` object, it contains eight 
 - albumArtFileNumber
 
 The albumArt for every song is cached on disk, and the album art is identified by a unique number
-that is less than 1000000 - the `albumArtFileNumber`
+that is less than 1,000,000 - the `albumArtFileNumber`
 
 ```dart
 // getting path to the albumArt JPG
