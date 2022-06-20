@@ -41,8 +41,11 @@ await mDatabase.findSongs(field:'album', query: 'Iro');
 // 3. all songs by or featuring 'woodkid'
 await mDatabase.findSongs(field:'artists', query: 'woodkid');
 
-// delete a song
+// delete a song (does not update the cache)
 await mDatabase.deleteSong(song);                   // deletes Iron by woodkid
+
+// update cache and fix any discrepancies introduced from deleting songs
+await mDatabase.refreshDatabase();
 ```
 
 ## The `SongRepr` Object
