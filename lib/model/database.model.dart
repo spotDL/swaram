@@ -1,4 +1,34 @@
 /// {@category backend}
+///
+/// [MusicDatabase] is a wrapper over `sembast`'s [Database] class that integrates with [SongRepr]
+/// thereby making it easier and simpler to use
+///
+/// ```dart
+/// // create an database, initialize it
+/// var mDatabase = MusicDatabase();
+/// await mDatabase.initialize();
+///
+/// // add a song (Iron by Woodkid)
+/// await mDatabase.addSong('./test/testSong.mp3');
+///
+/// // search for a song (returns a list of `SongRepr`)
+///
+/// // 1. all songs starting with the letters 'iro'
+/// var song = (await mDatabase.findSongsByName(query: 'iro').first;
+///
+/// // 2. all songs belonging to albums starting with 'iro'
+/// await mDatabase.findSongsByAlbum(query: 'Iro');
+///
+/// // 3. all songs by or featuring 'woodkid'
+/// await mDatabase.findSongsByArtist(query: 'woodkid');
+///
+/// // delete a song (deletes Iron by woodkid, albumArt will not be removed)
+/// await mDatabase.deleteSong(song);
+///
+/// // update cache and fix any discrepancies introduced from deleting songs
+/// await mDatabase.refreshDatabase();
+/// ```
+///
 
 // Dart imports:
 import 'dart:convert';
@@ -19,7 +49,7 @@ import 'package:swaram/util/path.util.dart';
 
 /// Store and access song details to quickly update UI
 ///
-class MusicDatabase extends ChangeNotifier {
+class MusicDatabase {
   /// sembast Database, access via `_store`
   ///
   late final Database _database;
@@ -126,19 +156,8 @@ class MusicDatabase extends ChangeNotifier {
 
   /// delete a song's ID3 data and albumArtCache
   ///
-  Future<void> deleteSong({required SongRepr uSong}) async {
-    // search for songs
-    var songResults = await findSongs(field: 'name', query: uSong.name);
-
-    // delete a song only if it has the same album and artists
-    for (var songEntry in songResults.entries) {
-      var songId = songEntry.key;
-      var song = songEntry.value;
-
-      if (uSong.album == song.album && listEquals(uSong.artists, song.artists)) {
-        await _store.record(songId).delete(_database);
-      }
-    }
+  Future<void> deleteSong({required SongRepr song}) async {
+    await _store.record(song.id).delete(_database);
   }
 
   /// remove remnants of deleted data (if any) from the database and albumArtCache
@@ -155,17 +174,17 @@ class MusicDatabase extends ChangeNotifier {
     });
 
     // get all songs
-    var allSongs = await findSongs(field: 'name', query: '');
+    var allSongs = await _findSongs(field: 'name', query: '');
 
     // empty database, re-update cache and database
     var filePaths = <String>[];
 
-    for (var songEntry in allSongs.entries) {
-      filePaths.add(songEntry.value.filePath);
+    for (var song in allSongs) {
+      filePaths.add(song.filePath);
 
-      await _store.record(songEntry.key).delete(_database);
+      await _store.record(song.id).delete(_database);
 
-      var albumArtFile = File(await getAlbumArtJpg(songEntry.value.albumArtFileNumber));
+      var albumArtFile = File(await getAlbumArtJpg(song.albumArtFileNumber));
 
       if (await albumArtFile.exists()) {
         await albumArtFile.delete();
@@ -183,7 +202,7 @@ class MusicDatabase extends ChangeNotifier {
   /// ### Note:
   /// - return Map is of the form {databasePrimaryKey: [SongRepr]}
   ///
-  Future<Map<String, SongRepr>> findSongs({
+  Future<List<SongRepr>> _findSongs({
     required String field,
     required String query,
     bool searchingByArtist = false,
@@ -204,10 +223,25 @@ class MusicDatabase extends ChangeNotifier {
     );
 
     // convert each result into a song object
-    return {
-      for (var songJSON in songs)
-        songJSON.key: SongRepr.fromMap(songJSON.value)..setId(songJSON.key)
-    };
+    return [for (var songJSON in songs) SongRepr.fromMap(songJSON.value)..setId(songJSON.key)];
+  }
+
+  /// returns all songs whose name starts with the given query
+  ///
+  Future<List<SongRepr>> findSongsByName({required String query}) async {
+    return _findSongs(field: 'name', query: query);
+  }
+
+  /// returns all songs whose album starts with the given query
+  ///
+  Future<List<SongRepr>> findSongsByAlbum({required String query}) async {
+    return _findSongs(field: 'album', query: query);
+  }
+
+  /// returns all songs who have at least one artist whose name starts with the given query
+  ///
+  Future<List<SongRepr>> findSongsByArtist({required String query}) async {
+    return _findSongs(field: 'artists', query: query, searchingByArtist: true);
   }
 
   /// check if a song exists in the database
@@ -217,10 +251,10 @@ class MusicDatabase extends ChangeNotifier {
   ///
   Future<bool> _containsSong(SongRepr song) async {
     // are there songs with the same title?
-    var titleMatchResults = await findSongs(field: 'name', query: song.name);
+    var titleMatchResults = await _findSongs(field: 'name', query: song.name);
 
     // compare album and artists for each song with the same title
-    for (var titleMatchRes in titleMatchResults.values) {
+    for (var titleMatchRes in titleMatchResults) {
       if (titleMatchRes.album == song.album && listEquals(titleMatchRes.artists, song.artists)) {
         return true;
       }

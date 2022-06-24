@@ -1,4 +1,12 @@
 /// {@category utilities}
+///
+/// Just a few utilities to locating various paths. The only utility function that will usually be
+/// in use is [getAlbumArtJpg].
+/// ```dart
+/// // getting path to the albumArt JPG
+/// var albumArtJpgPath = await getAlbumArtJpg(song.albumArtFileNumber);
+/// ```
+///
 
 // Dart imports:
 import 'dart:io';
@@ -25,7 +33,7 @@ Future<String> getSwaramDocsPath() async {
 
   return join(
     appDocsDir.path,
-    'swaram',
+    'Swaram',
   );
 }
 

@@ -1,6 +1,42 @@
 /// {@category backend}
+///
+/// The quantum of information exchange is the [SongRepr] object, it contains nine properties:
+///
+/// - id (song id in the database)
+///
+/// - name
+///
+/// - filePath
+///
+/// - album
+///
+/// - artists (note: 'artists', not 'artist')
+///
+/// - genre
+///
+/// - trackPos (position of the track in the album)
+///
+/// - lyrics
+///
+/// - albumArtFileNumber
+///
+/// The albumArt for every song is cached on disk, and the album art is identified by a unique number
+/// that is less than 1,000,000 - the `albumArtFileNumber`
+///
+/// Consider looking at [getAlbumArtJpg] to get the path to the cached album art
+///
+/// ```dart
+/// // getting path to the albumArt JPG
+/// var albumArtJpgPath = await getAlbumArtJpg(song.albumArtFileNumber);
+/// ```
+///
 library song.model;
 
+// Project imports:
+import 'package:swaram/util/path.util.dart';
+
+///{@category backend}
+///
 /// a representation of a song stored in the database
 ///
 class SongRepr {
