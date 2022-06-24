@@ -1,0 +1,12 @@
+dartdoc:
+  categories:
+    "backend":
+      name: Backend
+    "utilities":
+      name: Utilities
+  exclude:
+    [
+      "package:swaram/main.dart",
+      "package:swaram/generated_plugin_registrant.dart",
+    ]
+  nodoc: ["*.ui.dart"]

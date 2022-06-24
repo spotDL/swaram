@@ -1,3 +1,5 @@
+/// {@category backend}
+
 // Dart imports:
 import 'dart:convert';
 import 'dart:io';
@@ -146,7 +148,7 @@ class MusicDatabase extends ChangeNotifier {
   ///
   Future<void> refreshDatabase() async {
     // empty album art cache
-    var albumArtCacheFolder = Directory(
+    Directory(
       await getAlbumArtCachePath(),
     ).listSync().forEach((element) {
       if (element is File) element.deleteSync();
@@ -163,7 +165,7 @@ class MusicDatabase extends ChangeNotifier {
 
       await _store.record(songEntry.key).delete(_database);
 
-      var albumArtFile = await File(await getAlbumArtJpg(songEntry.value.albumArtFileNumber));
+      var albumArtFile = File(await getAlbumArtJpg(songEntry.value.albumArtFileNumber));
 
       if (await albumArtFile.exists()) {
         await albumArtFile.delete();
@@ -179,7 +181,7 @@ class MusicDatabase extends ChangeNotifier {
   /// with the chosen query
   ///
   /// ### Note:
-  /// - return Map is of the form {databasePrimaryKey: [Song]}
+  /// - return Map is of the form {databasePrimaryKey: [SongRepr]}
   ///
   Future<Map<String, SongRepr>> findSongs({
     required String field,
@@ -202,7 +204,10 @@ class MusicDatabase extends ChangeNotifier {
     );
 
     // convert each result into a song object
-    return {for (var songJSON in songs) songJSON.key: SongRepr.fromMap(songJSON.value)};
+    return {
+      for (var songJSON in songs)
+        songJSON.key: SongRepr.fromMap(songJSON.value)..setId(songJSON.key)
+    };
   }
 
   /// check if a song exists in the database

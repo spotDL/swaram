@@ -1,0 +1,178 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "flutter: sort imports",
+			"command": "flutter",
+			"args": [
+				"pub",
+				"global",
+				"run",
+				"import_sorter:main"
+			],
+			"type": "shell",
+			"group": "none",
+			"presentation": {
+				"reveal": "silent"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "flutter: build docs",
+			"command": "dart",
+			"args": [
+				"doc",
+				"--output",
+				"docs"
+			],
+			"group": "none",
+			"type": "shell",
+			"presentation": {
+				"reveal": "silent"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "flutter: build android (apk)",
+			"command": "flutter",
+			"args": [
+				"build",
+				"apk",
+				"--split-per-abi",
+				"--verbose"
+			],
+			"group": "build",
+			"type": "shell",
+			"presentation": {
+				"reveal": "silent"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "flutter: build windows",
+			"command": "flutter",
+			"args": [
+				"build",
+				"windows",
+				"--verbose"
+			],
+			"group": "build",
+			"type": "shell",
+			"presentation": {
+				"reveal": "silent"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "flutter: build msix",
+			"command": "flutter",
+			"args": [
+				"pub",
+				"run",
+				"msix:create"
+			],
+			"group": "build",
+			"type": "shell",
+			"presentation": {
+				"reveal": "silent"
+			},
+			"dependsOn": [
+				"flutter: build windows"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "flutter: build web",
+			"command": "flutter",
+			"args": [
+				"build",
+				"web",
+				"--verbose"
+			],
+			"group": "build",
+			"type": "shell",
+			"presentation": {
+				"reveal": "silent"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "flutter: add deps",
+			"command": "flutter",
+			"args": [
+				"pub",
+				"add",
+				"${input:devDeps}",
+				"${input:depName}"
+			],
+			"group": "none",
+			"type": "shell",
+			"presentation": {
+				"reveal": "silent"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "flutter: update deps",
+			"command": "flutter",
+			"args": [
+				"pub",
+				"upgrade",
+			],
+			"group": "none",
+			"type": "shell",
+			"presentation": {
+				"reveal": "silent"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "flutter: clean",
+			"command": "flutter",
+			"args": [
+				"clean"
+			],
+			"group": "build",
+			"type": "shell",
+			"presentation": {
+				"reveal": "silent"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "flutter: build all (no linux|iOS|MacOS)",
+			"group": "build",
+			"type": "shell",
+			"presentation": {
+				"reveal": "silent"
+			},
+			"problemMatcher": [],
+			"dependsOn": [
+				"flutter: clean",
+				"flutter: update deps",
+				"flutter: build android (apk)",
+				"flutter: build web",
+				"flutter: build windows",
+				"flutter: build msix"
+			],
+			"dependsOrder": "sequence"
+		},
+	],
+	"inputs": [
+		{
+			"id": "devDeps",
+			"description": "Is this a development dependency?",
+			"type": "pickString",
+			"options": [
+				"--dev",
+				""
+			],
+			"default": ""
+		},
+		{
+			"id": "depName",
+			"description": "What is your dependencies name?",
+			"type": "promptString",
+		}
+	]
+}

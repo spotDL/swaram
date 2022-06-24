@@ -23,8 +23,8 @@ will experience app-breaking bugs.
 var mDatabase = MusicDatabase();
 await mDatabase.initialize();
 
-// add a song
-await mDatabase.addSong('./test/testSong.mp3');     // lets say that the song is Iron by Woodkid
+// add a song (Iron by Woodkid)
+await mDatabase.addSong('./test/testSong.mp3');
 
 // search for a song (returns a list of `SongRepr`)
 
@@ -41,8 +41,8 @@ await mDatabase.findSongs(field:'album', query: 'Iro');
 // 3. all songs by or featuring 'woodkid'
 await mDatabase.findSongs(field:'artists', query: 'woodkid');
 
-// delete a song (does not update the cache)
-await mDatabase.deleteSong(song);                   // deletes Iron by woodkid
+// delete a song (deletes Iron by woodkid, albumArt will not be removed)
+await mDatabase.deleteSong(song);
 
 // update cache and fix any discrepancies introduced from deleting songs
 await mDatabase.refreshDatabase();
@@ -50,7 +50,9 @@ await mDatabase.refreshDatabase();
 
 ## The `SongRepr` Object
 
-The quantum of information exchange is the `SongRepr` object, it contains eight properties:
+The quantum of information exchange is the `SongRepr` object, it contains nine properties:
+
+- id (song id in the database)
 
 - name
 
@@ -86,6 +88,7 @@ developer notes in the source code.
     - `.model.dart`: Files that compose the data model for the app.
 
     - `.ui.dart`: UI components. The main navigation routing pages are to be stored under
-    `./lib/ui`, the custom components used for those pages are under `./lib/ui/components`.
+    `./lib/ui`, the custom components used for those pages are under `./lib/ui/components`. These
+    files will not be documented.
 
     - `.util.dart`: Generic helper/ease-of-life functions.

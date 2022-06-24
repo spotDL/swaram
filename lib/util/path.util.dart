@@ -1,3 +1,5 @@
+/// {@category utilities}
+
 // Dart imports:
 import 'dart:io';
 

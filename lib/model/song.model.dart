@@ -1,3 +1,6 @@
+/// {@category backend}
+library song.model;
+
 /// a representation of a song stored in the database
 ///
 class SongRepr {
@@ -33,6 +36,10 @@ class SongRepr {
   ///
   late final int albumArtFileNumber;
 
+  late final String _dbId;
+
+  bool _idIsSet = false;
+
   /// construct a song representation with the given details
   ///
   SongRepr({
@@ -45,6 +52,19 @@ class SongRepr {
     required this.genre,
     required this.lyrics,
   });
+
+  /// set the songs id
+  void setId(String id) {
+    if (!_idIsSet) {
+      _dbId = id;
+      _idIsSet = true;
+    } else {
+      throw Exception('databaseId can only be set once');
+    }
+  }
+
+  /// id of the song in the database
+  String get id => _dbId;
 
   /// construct a song representation from JSON returned form [toMap]
   ///
