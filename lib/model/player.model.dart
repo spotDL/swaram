@@ -7,7 +7,7 @@
 /// var musicPlayer = Player();
 ///
 /// // load up a song
-/// await musicPlayer.load('./someSong.mp3');
+/// await musicPlayer.load(SongReprObject);
 ///
 /// // play the song
 /// await musicPlayer.play();
@@ -24,14 +24,14 @@
 /// ```dart
 /// // live update current played seconds & total seconds
 /// SomeWidgetTree(
-///   child: Text('played ${musicPlayer.progress}% of ${musicPlayer.duration} seconds');
+///   child: Text('played ${musicPlayer.cProgress} seconds of ${musicPlayer.cDuration} seconds');
 /// )
 ///
 /// // seek based on slider
 /// SomeWidgetTree(
 ///   child: Slider(
 ///     onChanged: (double positionOutOfHundred) {
-///       musicPlayer.seek(positionOutOfHundred);
+///       musicPlayer.seek(positionOutOfHundred.toInt());
 ///     }
 ///   )
 /// )
@@ -44,59 +44,92 @@ import 'package:flutter/foundation.dart';
 // Package imports:
 import 'package:audioplayers/audioplayers.dart';
 
+// Project imports:
+import 'package:swaram/model/song.model.dart';
+
+// TODO: implement queue
+
 /// A wrapper around [AudioPlayer] to ease updating UI
 ///
 class Player extends ChangeNotifier {
   /// Internal [AudioPlayer] reference
   ///
-  final AudioPlayer _player = AudioPlayer();
+  final AudioPlayer _player = AudioPlayer()..setReleaseMode(ReleaseMode.stop);
 
-  /// total length of the current song in seconds
+  /// total length of the current song in milliseconds
   ///
-  int _duration = 0;
+  late Duration _duration;
 
-  /// duration of current song in seconds
+  /// duration of current song in milliseconds
   ///
-  int get duration => _duration;
+  int get cDuration => _duration.inMilliseconds;
 
-  /// current player position as percentage
+  /// duration of current song formatted as text
   ///
-  double _progress = 0;
+  String get cDurationAsText => _formatDuration(_duration);
 
-  /// how much of the song has been played as a percentage
+  /// current playback progress in milliseconds
   ///
-  double get progress => _progress;
+  late Duration _progress;
 
-  /// true if audio playback is still active
-  bool get isPlaying => _player.state == PlayerState.playing;
+  /// playback progress of the current song in milliseconds
+  ///
+  int get cProgress => _progress.inMilliseconds;
 
-  /// true if audio playback is still paused
-  bool get isPaused => _player.state == PlayerState.paused;
+  /// the song currently loaded up
+  ///
+  late SongRepr _song;
 
-  /// true if currently loaded song has been played from start to end
-  bool get isComplete => _player.state == PlayerState.completed;
+  /// the song currently loaded up
+  ///
+  SongRepr get song => _song;
+
+  /// playback progress of the current song formatted as text
+  ///
+  String get cProgressAsText => _formatDuration(_progress);
+
+  /// true if audio playback is currently active
+  ///
+  bool get playing => _player.state == PlayerState.playing;
+
+  /// true if audio playback is currently paused
+  ///
+  bool get paused => _player.state == PlayerState.paused;
+
+  /// true if the playback has reached the last millisecond
+  ///
+  bool _playbackFinished = false;
+
+  /// true if the playback has reached the last millisecond
+  ///
+  bool get playbackFinishd => _playbackFinished;
 
   /// create a `Player` object
   ///
   Player() {
     _player.onDurationChanged.listen((Duration totalDuration) async {
-      _duration = totalDuration.inSeconds;
+      _duration = totalDuration;
       notifyListeners();
     });
 
     _player.onPositionChanged.listen((Duration currentPosition) {
-      _progress = (currentPosition.inSeconds / _duration) * 100;
+      _progress = currentPosition;
+
+      if (cProgress == cDuration) _playbackFinished = true;
+
       notifyListeners();
     });
   }
 
   /// load up the song at the given path, and prepare it to be played
   ///
-  Future<void> load({required String mp3Path}) async {
-    _duration = 0;
-    _progress = 0;
+  Future<void> load({required SongRepr song}) async {
+    _song = song;
+    _playbackFinished = false;
+    _duration = const Duration(milliseconds: 0);
+    _progress = const Duration(milliseconds: 0);
 
-    await _player.setSource(DeviceFileSource(mp3Path));
+    await _player.setSource(DeviceFileSource(song.filePath));
   }
 
   /// play/resume the loaded up song
@@ -111,15 +144,10 @@ class Player extends ChangeNotifier {
     await _player.pause();
   }
 
-  /// playback from the point where `positionPercentage` percent of the song has been played
+  /// playback from the point where `playbackInMilliseconds`ms of the song has been played
   ///
-  Future<void> setPosition({required double positionPercentage}) async {
-    while (_duration == 0) {
-      await Future.delayed(const Duration(milliseconds: 250));
-    }
-
-    var pos = Duration(seconds: ((positionPercentage / 100) * _duration).toInt());
-    await _player.seek(pos);
+  Future<void> setPosition({required int playbackInMilliseconds}) async {
+    await _player.seek(Duration(milliseconds: playbackInMilliseconds));
   }
 
   /// internal magic, get rid of unused resources
@@ -127,4 +155,8 @@ class Player extends ChangeNotifier {
   Future<void> done() async {
     await _player.dispose();
   }
+
+  /// convert duration to mm:ss
+  String _formatDuration(Duration duration) =>
+      duration.toString().split('.').first.split(':').sublist(1).join(':');
 }

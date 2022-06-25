@@ -9,6 +9,9 @@ documentation with `dart doc` and looking at the library level documentation.
 
 ## Other notes
 
+- You can look at more detailed API docs by generating the documentation using `dartdoc`. Further
+developer notes in the source code.
+
 - File naming conventions:
 
     - `.model.dart`: Files that compose the data model for the app.
