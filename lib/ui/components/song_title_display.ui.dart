@@ -20,24 +20,52 @@ class SongTitleDisplay extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // song name and artists
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    player.song.name,
-                    style: const TextStyle(fontSize: 25),
-                  ),
-                  Text(player.song.artists.join(', ')),
-                ],
+              // Expanded to constrain horizontal size for listviews
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // song name, scrollable
+                    SizedBox(
+                      height: 30,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: [
+                          Text(
+                            player.song.name,
+                            style: const TextStyle(fontSize: 25),
+                          )
+                        ],
+                      ),
+                    ),
+
+                    // artists, scrollable
+                    SizedBox(
+                      height: 30,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: [
+                          for (var artist in player.song.artists)
+                            TextButton(
+                              onPressed: () {
+                                // TODO: redirect to artist page
+                              },
+                              child: Text(artist),
+                            )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
               // like button
               IconButton(
-                  onPressed: () {
-                    // TODO: like button, `SongRepr.toggleLike()`
-                  },
-                  icon: const Icon(Icons.favorite_border_rounded))
+                onPressed: () {
+                  // TODO: like button, `SongRepr.toggleLike()`
+                },
+                icon: const Icon(Icons.favorite_border_rounded),
+              )
             ],
           ),
         );

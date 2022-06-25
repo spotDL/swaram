@@ -15,7 +15,7 @@ void main(List<String> args) async {
   var mdb = MusicDatabase();
   await mdb.initialize();
 
-  var song = (await mdb.findSongsByName(query: 'H')).first;
+  var song = (await mdb.findSongsByName(query: 'The ')).first;
 
   var player = Player();
   await player.load(song: song);
@@ -33,8 +33,16 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
+    return MaterialApp(
+      darkTheme: ThemeData.from(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.lime,
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+      ),
+      themeMode: ThemeMode.dark,
+      home: const Scaffold(
         body: Center(child: PlayerPane()),
       ),
     );

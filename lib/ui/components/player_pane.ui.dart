@@ -69,7 +69,7 @@ class PlayerPane extends StatelessWidget {
             Slider(
               min: 0,
               value: player.cProgress.toDouble(),
-              max: player.cDuration.toDouble(),
+              max: player.cDuration.toDouble() + 1000,
               onChanged: (newPosition) {
                 player.setPosition(playbackInMilliseconds: newPosition.toInt());
               },
