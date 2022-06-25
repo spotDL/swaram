@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:provider/provider.dart';
+import 'package:sembast/sembast.dart';
 
 // Project imports:
 import 'package:swaram/model/database.model.dart';
@@ -15,7 +16,7 @@ void main(List<String> args) async {
   var mdb = MusicDatabase();
   await mdb.initialize();
 
-  var song = (await mdb.findSongsByName(query: 'The ')).first;
+  var song = (await mdb.findSongsByAlbum(query: 'iRoN')).first;
 
   var player = Player();
   await player.load(song: song);

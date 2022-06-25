@@ -56,7 +56,7 @@ class MusicDatabase {
 
   /// sembast StoreRef, used to manipulate `_database`
   ///
-  final _store = StoreRef<String, dynamic>.main();
+  final _store = StoreRef<String, Map<String, dynamic>>('songs');
 
   /// generate random numbers
   ///
@@ -144,8 +144,14 @@ class MusicDatabase {
     );
 
     if (!await _containsSong(song)) {
+      // get and modify songMap
+      var songMap = song.toMap();
+      songMap['searchName'] = songMap['name'].toString().toLowerCase();
+      songMap['searchAlbum'] = songMap['album'].toString().toLowerCase();
+      songMap['searchArtists'] = [for (var a in songMap['artists']) a.toString().toLowerCase()];
+
       // database update
-      await _store.add(_database, song.toMap());
+      await _store.add(_database, songMap);
 
       // action status
       return true;
@@ -218,30 +224,33 @@ class MusicDatabase {
     var songs = await _store.find(
       _database,
       finder: Finder(
-        filter: Filter.matches(field, '$query.*', anyInList: searchingByArtist),
+        filter: Filter.matches(field, '^$query.*', anyInList: searchingByArtist),
       ),
     );
 
     // convert each result into a song object
-    return [for (var songJSON in songs) SongRepr.fromMap(songJSON.value)..setId(songJSON.key)];
+    return [for (var songJSON in songs) SongRepr.fromMap(songJSON.value)..setId(songJSON.key)]
+      ..sort(
+        (a, b) => a.name.compareTo(b.name),
+      );
   }
 
   /// returns all songs whose name starts with the given query
   ///
   Future<List<SongRepr>> findSongsByName({required String query}) async {
-    return _findSongs(field: 'name', query: query);
+    return _findSongs(field: 'searchName', query: query.toLowerCase());
   }
 
   /// returns all songs whose album starts with the given query
   ///
   Future<List<SongRepr>> findSongsByAlbum({required String query}) async {
-    return _findSongs(field: 'album', query: query);
+    return _findSongs(field: 'searchAlbum', query: query.toLowerCase());
   }
 
   /// returns all songs who have at least one artist whose name starts with the given query
   ///
   Future<List<SongRepr>> findSongsByArtist({required String query}) async {
-    return _findSongs(field: 'artists', query: query, searchingByArtist: true);
+    return _findSongs(field: 'searchArtists', query: query.toLowerCase(), searchingByArtist: true);
   }
 
   /// check if a song exists in the database

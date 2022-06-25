@@ -119,7 +119,7 @@ class SongRepr {
 
   /// convert song representation to a Map to be stored in the database
   ///
-  Map toMap() {
+  Map<String, dynamic> toMap() {
     return {
       'name': name,
       'album': album,
