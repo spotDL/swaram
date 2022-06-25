@@ -20,6 +20,7 @@ class SongTitleDisplay extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // song name and artists
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -30,6 +31,8 @@ class SongTitleDisplay extends StatelessWidget {
                   Text(player.song.artists.join(', ')),
                 ],
               ),
+
+              // like button
               IconButton(
                   onPressed: () {
                     // TODO: like button, `SongRepr.toggleLike()`

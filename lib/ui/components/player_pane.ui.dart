@@ -21,7 +21,10 @@ class PlayerPane extends StatelessWidget {
       builder: (context, player, child) {
         return Column(
           children: [
+            // song title & like button
             const SongTitleDisplay(),
+
+            // playback controls
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -61,6 +64,8 @@ class PlayerPane extends StatelessWidget {
                 )
               ],
             ),
+
+            // playback progress slider
             Slider(
               min: 0,
               value: player.cProgress.toDouble(),
@@ -69,6 +74,8 @@ class PlayerPane extends StatelessWidget {
                 player.setPosition(playbackInMilliseconds: newPosition.toInt());
               },
             ),
+
+            // playback duration display
             Padding(
               padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
               child: Row(

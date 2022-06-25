@@ -9,4 +9,4 @@ dartdoc:
       "package:swaram/main.dart",
       "package:swaram/generated_plugin_registrant.dart",
     ]
-  nodoc: ["*.ui.dart"]
+  nodoc: ["**.ui.dart"]

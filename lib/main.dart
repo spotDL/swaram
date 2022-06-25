@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 // Project imports:
 import 'package:swaram/model/database.model.dart';
 import 'package:swaram/model/player.model.dart';
-import 'package:swaram/ui/components/player.ui.dart';
+import 'package:swaram/ui/components/player_pane.ui.dart';
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
