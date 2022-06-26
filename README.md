@@ -7,6 +7,9 @@ A music manager to go along with spotDL. Still a work in progress.
 The backend has been completed. You can see relevant "quick-start" docs by generating the entire
 documentation with `dart doc` and looking at the library level documentation.
 
+You can get a quick overview of the major issues and their interrelations by taking a look at
+our [project board](https://github.com/orgs/spotDL/projects/7).
+
 ## Other notes
 
 - You can look at more detailed API docs by generating the documentation using `dartdoc`. Further
