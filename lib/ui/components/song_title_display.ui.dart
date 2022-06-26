@@ -64,7 +64,9 @@ class SongTitleDisplay extends StatelessWidget {
                 onPressed: () {
                   // TODO: like button, `SongRepr.toggleLike()`
                 },
-                icon: const Icon(Icons.favorite_border_rounded),
+                icon: Icon(
+                  player.song.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                ),
               )
             ],
           ),

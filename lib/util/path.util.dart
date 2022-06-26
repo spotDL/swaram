@@ -57,10 +57,10 @@ Future<String> getAlbumArtCachePath() async {
 
 /// get file path to a specific album art cover
 ///
-Future<String> getAlbumArtJpg(int albumArtId) async {
+Future<String> getAlbumArtJpg({required String albumArtCode}) async {
   return join(
     await getSwaramDocsPath(),
     'albumArtCache',
-    '$albumArtId.jpg',
+    '$albumArtCode.jpg',
   );
 }

@@ -1,134 +1,118 @@
 /// {@category backend}
 ///
-/// The quantum of information exchange is the [SongRepr] object, it contains nine properties:
+/// The quantum of information exchange is the [Song] object, it contains nine properties:
 ///
 /// - id (song id in the database)
 ///
-/// - name
-///
 /// - filePath
 ///
-/// - album
+/// - title
 ///
-/// - artists (note: 'artists', not 'artist')
+/// - songArtists (note: 'artists', not 'artist')
 ///
-/// - genre
-///
-/// - trackPos (position of the track in the album)
+/// - genres
 ///
 /// - lyrics
 ///
-/// - albumArtFileNumber
+/// - album
 ///
-/// The albumArt for every song is cached on disk, and the album art is identified by a unique number
-/// that is less than 1,000,000 - the `albumArtFileNumber`
+/// - albumArtists (note: 'artists', not 'artist')
 ///
-/// Consider looking at [getAlbumArtJpg] to get the path to the cached album art
+/// - albumPos (position of the track in the album)
 ///
-/// ```dart
-/// // getting path to the albumArt JPG
-/// var albumArtJpgPath = await getAlbumArtJpg(song.albumArtFileNumber);
-/// ```
+/// - cachedAlbumArtFilePath (path to the cached album art)
 ///
 library song.model;
 
-// Project imports:
-import 'package:swaram/util/path.util.dart';
-
-///{@category backend}
+/// an easy way to access song details
 ///
-/// a representation of a song stored in the database
-///
-class SongRepr {
-  /// path to the file on disk
+class Song {
+  /// `mp3` file path
   ///
   late final String filePath;
 
-  /// song's name
+  /// title of the song
   ///
-  late final String name;
+  late final String title;
 
-  /// album name
+  /// song artists
   ///
-  late final String album;
+  late final List<String> songArtists;
 
-  /// the contributing artists (for this song)
+  /// song genres
   ///
-  late final List<String> artists;
+  late final List<String> genres;
 
-  /// genre of the song
-  ///
-  late final String genre;
-
-  /// position of the track within the album
-  ///
-  late final int trackPos;
-
-  /// lyrics of the song if available
+  /// lyrics (can be an empty string)
   ///
   late final String lyrics;
 
-  /// number of the albumArtFile
+  /// name of the album
   ///
-  late final int albumArtFileNumber;
+  late final String album;
 
-  late final String _dbId;
+  /// album artists
+  ///
+  late final List<String> albumArtists;
 
-  bool _idIsSet = false;
+  /// position of the song in album
+  ///
+  late final int albumPosition;
+
+  /// album art cache code
+  ///
+  late final String cachedAlbumArtFilePath;
+
+  /// song's primary key in the database
+  ///
+  late final String id;
+
+  // TODO: Liked songs, how?
 
   /// construct a song representation with the given details
   ///
-  SongRepr({
+  /// ### Note:
+  /// - Make sure to set the [id] attribute after object creation
+  ///
+  Song({
     required this.filePath,
-    required this.name,
-    required this.album,
-    required this.artists,
-    required this.trackPos,
-    required this.albumArtFileNumber,
-    required this.genre,
+    required this.title,
+    required this.songArtists,
+    required this.genres,
     required this.lyrics,
+    required this.album,
+    required this.albumArtists,
+    required this.albumPosition,
+    required this.cachedAlbumArtFilePath,
   });
 
-  /// set the songs id
-  void setId(String id) {
-    if (!_idIsSet) {
-      _dbId = id;
-      _idIsSet = true;
-    } else {
-      throw Exception('databaseId can only be set once');
-    }
-  }
-
-  /// id of the song in the database
-  String get id => _dbId;
-
-  /// construct a song representation from JSON returned form [toMap]
+  /// construct a song representation from the [Map] returned form [toMap]
   ///
-  SongRepr.fromMap(Map<String, dynamic> map) {
-    name = map['name'];
-    album = map['album'];
-    genre = map['genre'];
-    lyrics = map['lyrics'];
+  Song.fromMap(Map<String, dynamic> map) {
     filePath = map['filePath'];
-    trackPos = map['trackPos'];
-    albumArtFileNumber = map['albumArtFileNumber'];
-
-    // we need this oddball notation to deal with ImmutableList<dynamic> that is passed occasionally
-    artists = [for (var artist in map['artists']) artist as String];
+    title = map['title'];
+    songArtists = [for (var artist in map['songArtists']) artist as String];
+    genres = [for (var genre in map['genres']) genre as String];
+    lyrics = map['lyrics'];
+    album = map['album'];
+    albumArtists = [for (var artist in map['albumArtists']) artist as String];
+    albumPosition = map['albumPosition'];
+    cachedAlbumArtFilePath = map['cachedAlbumArtFilePath'];
   }
 
-  /// convert song representation to a Map to be stored in the database
+  /// convert song representation to a [Map] to be stored in the database
   ///
   Map<String, dynamic> toMap() {
     return {
-      'name': name,
-      'album': album,
-      'genre': genre,
-      'lyrics': lyrics,
-      'artists': artists,
       'filePath': filePath,
-      'trackPos': trackPos,
-      'albumArtFileNumber': albumArtFileNumber,
+      'title': title,
+      'songArtists': songArtists,
+      'genres': genres,
+      'lyrics': lyrics,
+      'album': album,
+      'albumArtists': albumArtists,
+      'albumPosition': albumPosition,
+      'cachedAlbumArtFilePath': cachedAlbumArtFilePath
     };
   }
 }

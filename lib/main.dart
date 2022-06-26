@@ -1,51 +1,32 @@
-// Flutter imports:
-import 'package:flutter/material.dart';
-
-// Package imports:
-import 'package:provider/provider.dart';
-import 'package:sembast/sembast.dart';
-
 // Project imports:
 import 'package:swaram/model/database.model.dart';
-import 'package:swaram/model/player.model.dart';
-import 'package:swaram/ui/components/player_pane.ui.dart';
+import 'package:swaram/util/database.util.dart';
 
 void main(List<String> args) async {
-  WidgetsFlutterBinding.ensureInitialized();
+  var db = MusicDatabase();
+  await db.initialize();
 
-  var mdb = MusicDatabase();
-  await mdb.initialize();
+  await addAllSongs(database: db, folderPath: r'C:\Users\ShadyTi\Music\');
 
-  var song = (await mdb.findSongsByAlbum(query: 'iRoN')).first;
+  print(await db.playlistWithNameExists(name: 'old Likes2'));
 
-  var player = Player();
-  await player.load(song: song);
+  var playlist = await db.createPlaylist(name: 'old Likes');
+  var pl2 = await db.createPlaylist(name: 'old Likes2');
 
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => player,
-      child: const Home(),
-    ),
-  );
-}
+  for (var song in await db.searchByTitle(query: 'b')) {
+    await playlist.addSong(song: song);
+  }
 
-class Home extends StatelessWidget {
-  const Home({Key? key}) : super(key: key);
+  for (var song in await db.searchByTitle(query: 'a')) {
+    await pl2.addSong(song: song);
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      darkTheme: ThemeData.from(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.lime,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
-      themeMode: ThemeMode.dark,
-      home: const Scaffold(
-        body: Center(child: PlayerPane()),
-      ),
-    );
+  var plm = await db.findPlaylists(query: 'oLd');
+
+  for (var pl in plm) {
+    print(pl.name);
+    for (var song in pl.songs) {
+      print('\t${song.title}');
+    }
   }
 }

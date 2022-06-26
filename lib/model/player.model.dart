@@ -78,11 +78,11 @@ class Player extends ChangeNotifier {
 
   /// the song currently loaded up
   ///
-  late SongRepr _song;
+  late Song _song;
 
   /// the song currently loaded up
   ///
-  SongRepr get song => _song;
+  Song get song => _song;
 
   /// playback progress of the current song formatted as text
   ///
@@ -123,7 +123,7 @@ class Player extends ChangeNotifier {
 
   /// load up the song at the given path, and prepare it to be played
   ///
-  Future<void> load({required SongRepr song}) async {
+  Future<void> load({required Song song}) async {
     _song = song;
     _playbackFinished = false;
     _duration = const Duration(milliseconds: 0);

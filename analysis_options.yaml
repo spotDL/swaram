@@ -2,7 +2,14 @@ include: package:flutter_lints/flutter.yaml
 
 linter:
   rules:
-    - prefer_single_quotes
-    - public_member_api_docs
+    # styling rules
     - always_use_package_imports
     - require_trailing_commas
+    - prefer_single_quotes
+
+    # ensure complete documentation
+    - public_member_api_docs
+
+    # explicitly mark sutures as awaited or unawaited, helps
+    # with not missing await statements
+    - unawaited_futures
