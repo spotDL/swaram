@@ -8,25 +8,15 @@ void main(List<String> args) async {
 
   await addAllSongs(database: db, folderPath: r'C:\Users\ShadyTi\Music\');
 
-  print(await db.playlistWithNameExists(name: 'old Likes2'));
+  var song = (await db.findSongsByArtist(query: 'wOoDkId')).first;
 
-  var playlist = await db.createPlaylist(name: 'old Likes');
-  var pl2 = await db.createPlaylist(name: 'old Likes2');
+  print(song.isLiked);
 
-  for (var song in await db.searchByTitle(query: 'b')) {
-    await playlist.addSong(song: song);
-  }
+  print((db.likes.songs));
 
-  for (var song in await db.searchByTitle(query: 'a')) {
-    await pl2.addSong(song: song);
-  }
+  await song.toggleLiked();
 
-  var plm = await db.findPlaylists(query: 'oLd');
+  print(song.isLiked);
 
-  for (var pl in plm) {
-    print(pl.name);
-    for (var song in pl.songs) {
-      print('\t${song.title}');
-    }
-  }
+  print((db.likes.songs));
 }

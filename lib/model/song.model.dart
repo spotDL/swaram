@@ -24,6 +24,8 @@
 ///
 library song.model;
 
+import 'package:swaram/model/database.model.dart';
+
 /// an easy way to access song details
 ///
 class Song {
@@ -67,7 +69,9 @@ class Song {
   ///
   late final String id;
 
-  // TODO: Liked songs, how?
+  bool _isLiked = false;
+
+  late final MusicDatabase _database;
 
   /// construct a song representation with the given details
   ///
@@ -75,6 +79,7 @@ class Song {
   /// - Make sure to set the [id] attribute after object creation
   ///
   Song({
+    required MusicDatabase database,
     required this.filePath,
     required this.title,
     required this.songArtists,
@@ -84,11 +89,14 @@ class Song {
     required this.albumArtists,
     required this.albumPosition,
     required this.cachedAlbumArtFilePath,
-  });
+    required bool isLiked,
+  })  : _isLiked = isLiked,
+        _database = database;
 
   /// construct a song representation from the [Map] returned form [toMap]
   ///
-  Song.fromMap(Map<String, dynamic> map) {
+  Song.fromMap({required MusicDatabase database, required Map<String, dynamic> map})
+      : _database = database {
     filePath = map['filePath'];
     title = map['title'];
     songArtists = [for (var artist in map['songArtists']) artist as String];
@@ -98,7 +106,20 @@ class Song {
     albumArtists = [for (var artist in map['albumArtists']) artist as String];
     albumPosition = map['albumPosition'];
     cachedAlbumArtFilePath = map['cachedAlbumArtFilePath'];
+    _isLiked = map['isLiked'];
   }
+
+  bool get isLiked => _isLiked;
+
+  Future<void> toggleLiked() async {
+    _isLiked = !_isLiked;
+
+    _isLiked
+        ? await _database.likes.addSong(song: this)
+        : await _database.likes.removeSong(song: this);
+  }
+
+  Future<void> setLiked() async => _isLiked = true;
 
   /// convert song representation to a [Map] to be stored in the database
   ///
@@ -112,7 +133,28 @@ class Song {
       'album': album,
       'albumArtists': albumArtists,
       'albumPosition': albumPosition,
-      'cachedAlbumArtFilePath': cachedAlbumArtFilePath
+      'cachedAlbumArtFilePath': cachedAlbumArtFilePath,
+      'isLiked': _isLiked
     };
+  }
+
+  @override
+  int get hashCode {
+    var hashString = title + album;
+
+    for (var artist in songArtists) {
+      hashString += artist;
+    }
+
+    for (var artist in albumArtists) {
+      hashString += artist;
+    }
+
+    return Object.hash(hashString, '');
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return hashCode == other.hashCode;
   }
 }

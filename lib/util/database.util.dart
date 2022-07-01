@@ -24,9 +24,13 @@ Future<String> prepRegExp({required String query}) async {
 /// ### Note:
 /// - returned list is sorted alphabetically
 ///
-Future<List<Song>> convertRecordToRepr({required List<RecordSnapshot> records}) async {
-  return [for (var record in records) Song.fromMap(record.value)..id = record.key]
-    ..sort((a, b) => a.title.compareTo(b.title));
+Future<List<Song>> convertRecordToRepr({
+  required MusicDatabase database,
+  required List<RecordSnapshot> records,
+}) async {
+  return [
+    for (var record in records) Song.fromMap(database: database, map: record.value)..id = record.key
+  ]..sort((a, b) => a.title.compareTo(b.title));
 }
 
 /// add all `mp3` files in the given directory to the database

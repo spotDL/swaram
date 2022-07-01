@@ -32,7 +32,7 @@ class SongTitleDisplay extends StatelessWidget {
                         scrollDirection: Axis.horizontal,
                         children: [
                           Text(
-                            player.song.name,
+                            player.song.title,
                             style: const TextStyle(fontSize: 25),
                           )
                         ],
@@ -45,7 +45,7 @@ class SongTitleDisplay extends StatelessWidget {
                       child: ListView(
                         scrollDirection: Axis.horizontal,
                         children: [
-                          for (var artist in player.song.artists)
+                          for (var artist in player.song.songArtists)
                             TextButton(
                               onPressed: () {
                                 // TODO: redirect to artist page

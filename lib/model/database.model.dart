@@ -15,13 +15,13 @@
 /// // all searches are case-insensitive
 ///
 /// // 1. all songs starting with the letters 'iro'
-/// var song = (await mDatabase.searchByTitle(query: 'iRo')).first;
+/// var song = (await mDatabase.findSongsByTitle(query: 'iRo')).first;
 ///
 /// // 2. all songs belonging to albums starting with 'iro'
-/// await mDatabase.searchByAlbum(query: 'IRo');
+/// await mDatabase.findSongsByAlbum(query: 'IRo');
 ///
 /// // 3. all songs by or featuring 'woodkid'
-/// await mDatabase.searchByArtist(query: 'WoOdK');
+/// await mDatabase.findSongsByArtist(query: 'WoOdK');
 ///
 /// // delete a song (deletes Iron by woodkid, albumArt will not be removed)
 /// await mDatabase.removeSong(song: song);
@@ -62,6 +62,8 @@ class MusicDatabase {
   ///
   final _masterPlaylistStore = StoreRef<String, Map<String, dynamic>>('playlists');
 
+  late final Playlist likes;
+
   /// completely initialize this object
   ///
   /// ### Note:
@@ -74,10 +76,24 @@ class MusicDatabase {
     _database = await databaseFactoryIo.openDatabase(
       await getSwaramDatabasePath(),
     );
+
+    // likes
+    var likePlaylists = await findPlaylists(query: 'likes');
+
+    for (var playlist in likePlaylists) {
+      if (playlist.name == 'likes') {
+        likes = playlist;
+        return;
+      }
+    }
+
+    likes = await createPlaylist(name: 'likes');
   }
 
   // song related
 
+  /// add the song at the given path to the database
+  ///
   Future<bool> addSong({required filePath}) async {
     // read the ID3 tags
     var fileBytes = await File(filePath).readAsBytes();
@@ -85,7 +101,7 @@ class MusicDatabase {
     var id3Data = data.metaTags;
 
     // if an identical song exists, exit
-    var matchSongs = await searchByTitle(query: id3Data['Title']);
+    var matchSongs = await findSongsByTitle(query: id3Data['Title']);
     var songArtists = (id3Data['Artist'] as String).split('/');
 
     for (var song in matchSongs) {
@@ -93,7 +109,7 @@ class MusicDatabase {
     }
 
     // if same album does not exist, cache the album art
-    var matchAlbumSongs = await searchByAlbum(query: id3Data['Album']);
+    var matchAlbumSongs = await findSongsByAlbum(query: id3Data['Album']);
     var albumArtists = (id3Data['Accompaniment'] as String).split('/');
 
     String cachePath = '';
@@ -115,6 +131,7 @@ class MusicDatabase {
 
     // add song to database
     var song = Song(
+      database: this,
       filePath: filePath,
       title: id3Data['Title'],
       songArtists: songArtists,
@@ -124,6 +141,7 @@ class MusicDatabase {
       albumArtists: albumArtists,
       albumPosition: int.parse(id3Data['TPOS']),
       cachedAlbumArtFilePath: cachePath,
+      isLiked: false,
     );
 
     // add extra search fields
@@ -151,18 +169,20 @@ class MusicDatabase {
     await _songStore.record(song.id).delete(_database);
   }
 
+  // song search related
+
   /// return all songs whose title starts with the given query
   ///
   /// ### Note:
   /// - returned songs sorted in alphabetical order
   ///
-  Future<List<Song>> searchByTitle({required String query}) async {
+  Future<List<Song>> findSongsByTitle({required String query}) async {
     var songRecords = await _songStore.find(
       _database,
       finder: Finder(filter: Filter.matches('searchTitle', await prepRegExp(query: query))),
     );
 
-    return convertRecordToRepr(records: songRecords);
+    return convertRecordToRepr(database: this, records: songRecords);
   }
 
   /// return all songs whose album starts with the given query
@@ -170,13 +190,13 @@ class MusicDatabase {
   /// ### Note:
   /// - returned songs sorted in alphabetical order
   ///
-  Future<List<Song>> searchByAlbum({required String query}) async {
+  Future<List<Song>> findSongsByAlbum({required String query}) async {
     var songRecords = await _songStore.find(
       _database,
       finder: Finder(filter: Filter.matches('searchAlbum', await prepRegExp(query: query))),
     );
 
-    return convertRecordToRepr(records: songRecords);
+    return convertRecordToRepr(database: this, records: songRecords);
   }
 
   /// return all songs that have at least one artist whose name starts with the given query
@@ -184,7 +204,7 @@ class MusicDatabase {
   /// ### Note:
   /// - returned songs sorted in alphabetical order
   ///
-  Future<List<Song>> searchByArtist({required String query}) async {
+  Future<List<Song>> findSongsByArtist({required String query}) async {
     var songRecords = await _songStore.find(
       _database,
       finder: Finder(
@@ -192,7 +212,13 @@ class MusicDatabase {
       ),
     );
 
-    return convertRecordToRepr(records: songRecords);
+    var songList = await convertRecordToRepr(database: this, records: songRecords);
+
+    for (var song in songList) {
+      if (likes.songs.contains(song)) await song.setLiked();
+    }
+
+    return songList;
   }
 
   // playlist related
@@ -222,6 +248,8 @@ class MusicDatabase {
     });
   }
 
+  /// find all playlists whose name starts with the given query
+  ///
   Future<List<Playlist>> findPlaylists({required String query}) async {
     var outPlaylists = <Playlist>[];
 
@@ -245,7 +273,7 @@ class MusicDatabase {
           finder: Finder(filter: Filter.custom((record) => record.key == songId)),
         );
 
-        songs.add(Song.fromMap(songRecords.first.value));
+        songs.add(Song.fromMap(database: this, map: songRecords.first.value)..id = songId);
       }
 
       outPlaylists.add(
@@ -264,7 +292,7 @@ class MusicDatabase {
       finder: Finder(filter: Filter.custom((record) => record.value['name'] == name.trim())),
     );
 
-    return !playlistRecords.isEmpty;
+    return playlistRecords.isNotEmpty;
   }
 
   // misc
@@ -281,7 +309,7 @@ class MusicDatabase {
     });
 
     // get all songs
-    var allSongs = await searchByTitle(query: '');
+    var allSongs = await findSongsByTitle(query: '');
 
     // TODO: playlist entries
 

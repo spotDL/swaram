@@ -54,4 +54,10 @@ class Playlist {
     songs.remove(song);
     await _dbReference.updatePlaylist(playlist: this);
   }
+
+  /// weather the playlist contains the given song
+  ///
+  Future<bool> contains({required Song song}) async {
+    return songs.contains(song);
+  }
 }
