@@ -61,6 +61,6 @@ Future<String> getAlbumArtJpg({required String albumArtCode}) async {
   return join(
     await getSwaramDocsPath(),
     'albumArtCache',
-    '$albumArtCode.jpg',
+    '${albumArtCode.replaceAll(RegExp('[<>|:\\/*"?]'), '')}.jpg',
   );
 }

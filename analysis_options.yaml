@@ -10,6 +10,6 @@ linter:
     # ensure complete documentation
     - public_member_api_docs
 
-    # explicitly mark sutures as awaited or unawaited, helps
+    # explicitly mark futures as awaited or unawaited, helps
     # with not missing await statements
     - unawaited_futures

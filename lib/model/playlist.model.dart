@@ -9,9 +9,6 @@ import 'package:swaram/model/database.model.dart';
 import 'package:swaram/model/song.model.dart';
 import 'package:swaram/util/database.util.dart';
 
-// Project imports:
-
-
 /// wrapper around playlist details for easy access and UI updating
 class Playlist extends ChangeNotifier {
   /// id of the playlist
@@ -25,12 +22,19 @@ class Playlist extends ChangeNotifier {
   // ======================================
 
   /// create a playlist object to represent an existing playlist
-  Playlist.fromID({required this.id});
+  Playlist._internal({required this.id});
+
+  /// create a playlist object to represent an existing playlist
+  static Future<Playlist> fromID({required String id}) async {
+    return Playlist._internal(id: id);
+  }
 
   /// make a playlist from scratch, add it to the database
-  Playlist.create({required String name}) {
-    parentDB.playlistStore
+  static Future<Playlist> create({required String name}) async {
+    var id = await parentDB.playlistStore
         .add(parentDB.database, {'name': name, 'searchName': name.toLowerCase(), 'songIDs': []});
+
+    return Playlist._internal(id: id);
   }
 
   /// delete this playlist from the database
@@ -69,7 +73,7 @@ class Playlist extends ChangeNotifier {
     var songIDs = await _getSongIDs();
 
     // convert to Songs
-    return [for (var songID in songIDs) Song.fromID(id: songID)];
+    return [for (var songID in songIDs) await Song.fromID(id: songID)];
   }
 
   /// add a song to the playlist
@@ -99,7 +103,9 @@ class Playlist extends ChangeNotifier {
   /// get IDs of all songs in the playlist
   Future<List<String>> _getSongIDs() async {
     var record = await parentDB.playlistStore.record(id).get(parentDB.database);
-    return record!['songIDs'] as List<String>;
+    record!;
+
+    return [for (var id in (record['songIDs'] as List)) id as String];
   }
 
   // ==========================
@@ -115,6 +121,6 @@ class Playlist extends ChangeNotifier {
       ),
     );
 
-    return [for (var record in playlistRecords) Playlist.fromID(id: record.key)];
+    return [for (var record in playlistRecords) await Playlist.fromID(id: record.key)];
   }
 }

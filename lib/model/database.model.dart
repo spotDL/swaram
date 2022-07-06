@@ -7,11 +7,6 @@ import 'package:swaram/model/playlist.model.dart';
 import 'package:swaram/model/song.model.dart';
 import 'package:swaram/util/path.util.dart';
 
-// /// create a [StoreRef] with a [String] as a key and a [Map]`<String, List<String>>` as
-// /// it's value
-// StoreRef<String, Map<String, List<String>>> stringMapStoreFactory(name) =>
-//     StoreRef<String, Map<String, List<String>>>(name);
-
 /// The actual music database, not the wrapper, [SwaramDatabase]
 class TrueDatabase {
   /// Internal sembast [Database]
@@ -28,10 +23,30 @@ class TrueDatabase {
     // (create if required and) open database
     database = await databaseFactoryIo.openDatabase(await getSwaramDatabasePath());
 
+    // create album art cache folder
+    await setupAppDocsFolder();
+
     // set playlist parentDB
     Playlist.parentDB = this;
 
     // set song parentDB
     Song.parentDB = this;
+
+    // set liked songs playlist
+    // find all playlists starting with the word 'likes'
+    var likeQueryPlaylists = await Playlist.findByName(name: 'likes');
+
+    Playlist? likedSongsPlaylist;
+
+    for (var playlist in likeQueryPlaylists) {
+      // set likes if exists
+      if (await playlist.getName() == 'likes') likedSongsPlaylist = playlist;
+    }
+
+    // create likes playlist if not existing
+    likedSongsPlaylist ??= await Playlist.create(name: 'likes');
+
+    // set likedSongs
+    Song.likedSongs = likedSongsPlaylist;
   }
 }
