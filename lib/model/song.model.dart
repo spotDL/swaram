@@ -1,3 +1,27 @@
+/// {@category backend}
+///
+/// The quantum of information exchange is the [Song] object. It also contains static methods
+/// to search for songs in the database.
+///
+/// To add a song to the database:
+/// ```dart
+/// var song = await Song.addToDB(path: pathToYouMP3File);
+/// ```
+///
+/// To find a song (search is case-insensitive):
+/// ```dart
+/// var songs = await Song.findSongsByTitle(title: 'HoUsE CaRpEnTeR');
+/// var songs = await Song.findSongsByAlbum(album: 'FolKsAnGe');
+/// var songs = await Song.findSongsByArtist(Artist: 'MyRKuR');
+/// ```
+///
+/// To find/change weather a song is liked or not:
+/// ```dart
+/// if (song.isLiked) print('liked');
+/// await song.toggleLike();
+/// ```
+///
+
 // Dart imports:
 import 'dart:convert';
 import 'dart:io';
@@ -48,7 +72,7 @@ class Song extends ChangeNotifier {
   late final String cachedAlbumArtFilePath;
 
   /// parent database
-  static late final TrueDatabase parentDB;
+  static late final SwaramDatabase parentDB;
 
   /// current like status
   bool _isLiked = false;

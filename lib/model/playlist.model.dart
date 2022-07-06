@@ -1,3 +1,25 @@
+/// {@category backend}
+///
+/// The [Playlist] class represents a playlist (obviously). The search functions for playlists
+/// are also bundled with it.
+///
+/// To create/delete a playlist:
+/// ```dart
+/// var playlist = await Playlist.create('enterYourNameHere');
+/// await playlist.setName('newNameGoesHere'); // change playlist name
+/// print(await playlist.getName());
+/// await playlist.delete();
+/// ```
+///
+/// To add/remove songs:
+/// ```dart
+/// await playlist.addSong(yourSongObjectGoesHere);
+/// await playlist.removeSong(yourSongObjectGoesHere);
+///
+/// var songs = await playlist.getSongs(); // get all songs in playlist
+/// ```
+///
+
 // Flutter imports:
 import 'package:flutter/foundation.dart';
 
@@ -15,7 +37,7 @@ class Playlist extends ChangeNotifier {
   late final String id;
 
   /// parent database
-  static late final TrueDatabase parentDB;
+  static late final SwaramDatabase parentDB;
 
   // ======================================
   // ===== constructors / destructors =====

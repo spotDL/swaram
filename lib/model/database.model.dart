@@ -1,3 +1,12 @@
+/// {@category backend}
+///
+/// This class is never used directly with exception of initialization, see
+/// [Playlist] and [Song] for the actual data handling
+///
+/// ```dart
+/// await SwaramDatabase().initialize();
+/// ```
+
 // Package imports:
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
@@ -7,8 +16,8 @@ import 'package:swaram/model/playlist.model.dart';
 import 'package:swaram/model/song.model.dart';
 import 'package:swaram/util/path.util.dart';
 
-/// The actual music database, not the wrapper, [SwaramDatabase]
-class TrueDatabase {
+/// Holds the major components that [Playlist] and [Song] use to manipulate and update the database
+class SwaramDatabase {
   /// Internal sembast [Database]
   late final Database database;
 

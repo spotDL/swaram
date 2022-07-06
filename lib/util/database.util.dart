@@ -1,6 +1,6 @@
 /// {@category utilities}
 ///
-/// A few utilities to help with the [TrueMusicDatabase] management
+/// A few utilities to help with the [SwaramDatabase] management
 ///
 
 // Dart imports:

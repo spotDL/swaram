@@ -5,7 +5,7 @@ import 'package:swaram/model/song.model.dart';
 import 'package:swaram/util/database.util.dart';
 
 void main(List<String> args) async {
-  await TrueDatabase().initialize();
+  await SwaramDatabase().initialize();
 
   await addAllSongs(folderPath: r'C:\Users\ShadyTi\Music\');
 
